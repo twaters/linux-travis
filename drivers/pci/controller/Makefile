@@ -37,6 +37,9 @@ obj-$(CONFIG_VMD) += vmd.o
 obj-$(CONFIG_PCIE_BRCMSTB) += pcie-brcmstb.o
 obj-$(CONFIG_PCI_LOONGSON) += pci-loongson.o
 obj-$(CONFIG_PCIE_HISI_ERR) += pcie-hisi-error.o
+obj-$(CONFIG_PCIE_IBEOS_EDGE2) += ibeos_edge2.o
+ibeos_edge2-y := ibeos_edge2_main.o ibeos_edge2_irq.o ibeos_edge2_mem.o
+ibeos_edge2-$(CONFIG_PCIE_IBEOS_EDGE2_DMA) += ibeos_edge2_dma.o
 obj-$(CONFIG_PCIE_APPLE) += pcie-apple.o
 obj-$(CONFIG_PCIE_MT7621) += pcie-mt7621.o
 
