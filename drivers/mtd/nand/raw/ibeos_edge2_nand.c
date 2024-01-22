@@ -651,8 +651,16 @@ static int edge2_nand_cmd(struct nand_chip *chip, const struct nand_subop *op)
         switch(op->instrs[i].type) {
             case NAND_OP_CMD_INSTR:
                 cmd = op->instrs[i].ctx.cmd.opcode;
-                enm->column = 0;
-                enm->cmd = 0;
+                switch(cmd) {
+                    case NAND_CMD_RNDOUT:
+                    case NAND_CMD_RNDOUTSTART:
+                        enm->column = addr;
+                    break;
+                    default:
+                        enm->column = 0;
+                        enm->cmd = 0;
+                    break;
+                }
                 break;
             case NAND_OP_ADDR_INSTR:
                 for(int j=op->instrs[i].ctx.addr.naddrs; j>0; --j) {
@@ -726,6 +734,12 @@ static int edge2_nand_cmd(struct nand_chip *chip, const struct nand_subop *op)
 
 static const struct nand_op_parser edge2_nand_op_parser = NAND_OP_PARSER(
     NAND_OP_PARSER_PATTERN(edge2_nand_cmd,
+        NAND_OP_PARSER_PAT_CMD_ELEM(false),
+        NAND_OP_PARSER_PAT_ADDR_ELEM(false, 2),
+        NAND_OP_PARSER_PAT_CMD_ELEM(false),
+        NAND_OP_PARSER_PAT_WAITRDY_ELEM(true),
+        NAND_OP_PARSER_PAT_DATA_IN_ELEM(true,256)),
+    NAND_OP_PARSER_PATTERN(edge2_nand_cmd,
         NAND_OP_PARSER_PAT_CMD_ELEM(true),
         NAND_OP_PARSER_PAT_ADDR_ELEM(true, 3),
         NAND_OP_PARSER_PAT_DATA_OUT_ELEM(true, 4096+256),
@@ -743,6 +757,7 @@ static int edge2_nand_exec_op(struct nand_chip *chip, const struct nand_operatio
     struct edge2_nand_mtd *enm = chip_to_enm(chip);
 
     if(!check_only) enm->cs = op->cs;
+    enm->cs = op->cs;
 
     return nand_op_parser_exec_op(chip, &edge2_nand_op_parser, op, check_only);
 }
@@ -826,6 +841,8 @@ static int __init init_edge2_nand(void)
 
     mtd = nand_to_mtd(&enm.chip);
     mtd->owner = THIS_MODULE;
+    mtd->writesize = 4096;
+    mtd->oobsize=256; /* doesn't seem to hurt, and it fixes problem on 6.6 kernel */
 
     enm.bounce_buffer = dma_alloc_coherent(ibeos_edge2_get_dev(0), FLASH_BUF_SIZE, &enm.bounce_buffer_phys, GFP_KERNEL);
     if(!enm.bounce_buffer) return -ENOMEM;
@@ -910,5 +927,5 @@ module_init(init_edge2_nand);
 module_exit(exit_edge2_nand);
 
 MODULE_LICENSE("GPL v2");
-MODULE_AUTHOR("Steven Seeger <steven.seeger@flightsystems.net>");
+MODULE_AUTHOR("Steven Seeger");
 MODULE_DESCRIPTION("MTD driver for Ibeos Edge-2 NAND");
