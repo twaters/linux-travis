@@ -930,7 +930,8 @@ static bool xgbe_phy_finisar_phy_quirks(struct xgbe_prv_data *pdata)
 	if (phy_data->port_mode != XGBE_PORT_MODE_SFP)
 		return false;
 
-	if ((phy_id & 0xfffffff0) != 0x01ff0cc0)
+	//if ((phy_id & 0xfffffff0) != 0x01ff0cc0)
+    if((phy_id & 0x00000ff0) != 0x00000cc0)
 		return false;
 
 	/* Enable Base-T AN */
