@@ -1365,6 +1365,7 @@ put:
 static void xgbe_phy_sfp_signals(struct xgbe_prv_data *pdata)
 {
 	struct xgbe_phy_data *phy_data = pdata->phy_data;
+#if 0
 	u8 gpio_reg, gpio_ports[2];
 	int ret;
 
@@ -1380,6 +1381,7 @@ static void xgbe_phy_sfp_signals(struct xgbe_prv_data *pdata)
 	}
 
 	phy_data->sfp_gpio_inputs = (gpio_ports[1] << 8) | gpio_ports[0];
+#endif
 
 	phy_data->sfp_mod_absent = xgbe_phy_check_sfp_mod_absent(phy_data);
 }
