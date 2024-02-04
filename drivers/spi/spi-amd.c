@@ -291,7 +291,7 @@ static inline int amd_spi_fifo_xfer(struct amd_spi *amd_spi,
 
 		if (xfer->tx_buf) {
 			buf = (u8 *)xfer->tx_buf;
-			if (!tx_len) {
+			if (!cmd_opcode) {
 				cmd_opcode = *(u8 *)xfer->tx_buf;
 				buf++;
 				xfer->len--;
