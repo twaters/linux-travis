@@ -1049,6 +1049,13 @@ config SUNPLUS_WATCHDOG
 
 # X86 (i386 + ia64 + x86_64) Architecture
 
+config IBEOS_EDGE2_WDT
+    tristate "Ibeos Edge2 Watchdog timer"
+    depends on PCIE_IBEOS_EDGE2
+    select WATCHDOG_CORE
+    help
+      Enabled support for Ibeos Edge2 Watchdog
+
 config ACQUIRE_WDT
 	tristate "Acquire SBC Watchdog Timer"
 	depends on X86
