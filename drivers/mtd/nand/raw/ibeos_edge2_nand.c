@@ -829,6 +829,7 @@ static int __init init_edge2_nand(void)
 
     memset(&enm, 0, sizeof(enm));
     enm.bar = ibeos_edge2_get_bar(0, 2);
+    if(!enm.bar) return -ENODEV;
 
     enm.status = NAND_STATUS_READY | NAND_STATUS_WP;
     init_completion(&enm.cmd_complete);

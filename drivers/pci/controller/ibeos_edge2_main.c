@@ -26,9 +26,9 @@ static int num_devices; /* TODO: atomic if more than one device */
 void *ibeos_edge2_get_bar(int devnum, int bar)
 {
     BUG_ON(devnum>=MAX_DEVICES);
-    BUG_ON(!states[devnum]);
     BUG_ON(bar>=NUM_BARS);
-    return states[devnum]->base[bar];
+    //BUG_ON(!states[devnum]);
+    return states[devnum]?states[devnum]->base[bar]:NULL;
 }
 EXPORT_SYMBOL(ibeos_edge2_get_bar);
 

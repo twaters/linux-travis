@@ -175,6 +175,7 @@ static int __init init_edge2_hwmon(void)
     ehs->parent = dev;
 
     ehs->bar = ibeos_edge2_get_bar(0, 2);
+    if(!ehs->bar) return -ENODEV;
 
     ehs->hwmon_dev = hwmon_device_register_with_info(dev, "edge2_sensors", ehs, &edge2_sensors_chip_info, NULL);
     if(IS_ERR(ehs->hwmon_dev)) {

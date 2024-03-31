@@ -89,6 +89,8 @@ static int __init init_edge2_wdt(void)
     memset(&iew, 0, sizeof(iew));
 
     iew.bar = ibeos_edge2_get_bar(0, 2);
+    if(!iew.bar) return -ENODEV;
+
     iew.wdt.info = &ibeos_edge2_wdt_info;
     iew.wdt.ops = &ibeos_edge2_wdt_ops;
     iew.wdt.timeout = DEFAULT_TIMEOUT;
