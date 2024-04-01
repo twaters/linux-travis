@@ -422,4 +422,12 @@ config ADI
 	  and SSM (Silicon Secured Memory).  Intended consumers of this
 	  driver include crash and makedumpfile.
 
+config IBEOS_EDGE1100_FRAM
+    tristate "Ibeos Edge-1100 FRAM"
+    depends on PCIE_IBEOS_EDGE1100
+    help
+      This device driver provides access to the FRAM on the Ibeos Edge-1100.
+      The FRAM has some regions that are read-only. These are used by the FPGA
+      to provide information on boot (TBD) and by the manufacturing process to hold
+      some information on the board.
 endmenu
