@@ -1,7 +1,7 @@
 /* Copyright 2021 Ibeos */
 
-#ifndef IBEOS_EDGE2__H
-#define IBEOS_EDGE2__H
+#ifndef IBEOS_EDGE1100__H
+#define IBEOS_EDGE1100__H
 
 #include <linux/device.h>
 #include <linux/types.h>
@@ -9,9 +9,9 @@
 #include <linux/irqdomain.h>
 #include <linux/wait.h>
 
-#include <linux/ibeos_edge2_dma.h>
+#include <linux/ibeos_edge1100_dma.h>
 
-#define IBEOS_EDGE2_DRVNAME "ibeos_edge2"
+#define IBEOS_EDGE1100_DRVNAME "ibeos_edge1100"
 
 #define NUM_BARS 6
 #define NUM_IRQS 32
@@ -28,7 +28,7 @@
 #define NUM_VDMA 8
 #define NUM_PDMA 2
 
-#if IS_ENABLED(CONFIG_PCIE_IBEOS_EDGE2_DMA)
+#if IS_ENABLED(CONFIG_PCIE_IBEOS_EDGE1100_DMA)
 struct ibeos_edge2_dma;
 #endif
 
@@ -58,7 +58,7 @@ typedef struct ibeos_edge2_state {
         char name[16];
     } irqs[NUM_IRQS];
 
-#if IS_ENABLED(CONFIG_PCIE_IBEOS_EDGE2_DMA)
+#if IS_ENABLED(CONFIG_PCIE_IBEOS_EDGE1100_DMA)
     struct ibeos_edge2_dma *dma;
 #endif
 } ibeos_edge2_state;
@@ -91,3 +91,4 @@ extern struct class *ibeos_edge2_class;
 extern int ibeos_edge2_get_virq(int, int);
 extern struct device *ibeos_edge2_get_dev(int devnum);
 extern void *ibeos_edge2_get_bar(int devnum, int bar);
+extern size_t ibeos_edge2_get_bar_size(int devnum, int bar);

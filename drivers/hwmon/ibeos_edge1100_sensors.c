@@ -5,7 +5,7 @@
 #include <linux/slab.h>
 #include <asm/io.h>
 
-#include <linux/ibeos_edge2.h>
+#include <linux/ibeos_edge1100.h>
 
 /* channel map
  * ADC 0 - 7

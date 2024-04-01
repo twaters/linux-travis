@@ -6,8 +6,8 @@
 #include <linux/slab.h>
 #include <linux/pci.h>
 
-#include <linux/ibeos_edge2.h>
-#include <linux/ibeos_edge2_driver.h>
+#include <linux/ibeos_edge1100.h>
+#include <linux/ibeos_edge1100_driver.h>
 
 static int ibeos_edge_mem_cdev_open(struct inode *inode, struct file *file)
 {

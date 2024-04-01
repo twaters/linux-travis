@@ -139,20 +139,20 @@ config PCIE_HISI_ERR
 	  Say Y here if you want error handling support
 	  for the PCIe controller's errors on HiSilicon HIP SoCs
 
-config PCIE_IBEOS_EDGE2
-    tristate "Ibeos Edge2 FPGA PCIe host bridge"
+config PCIE_IBEOS_EDGE1100
+    tristate "Ibeos Edge1100 FPGA PCIe host bridge"
     select PCI_HOST_COMMON
     select IRQ_DOMAIN
     help
-      Say Y here if you want to use the Ibeos Edge2's FPGA
+      Say Y here if you want to use the Ibeos Edge1100's FPGA
 
-config PCIE_IBEOS_EDGE2_DMA
-    bool "Ibeos Edge2 DMAEngine implementation"
-    depends on PCIE_IBEOS_EDGE2
+config PCIE_IBEOS_EDGE1100_DMA
+    bool "Ibeos Edge1100 DMAEngine implementation"
+    depends on PCIE_IBEOS_EDGE1100
     select DMA_ENGINE
     select DMA_VIRTUAL_CHANNELS
     help
-      Support Ibeos Edge2 FPGA DMA
+      Support Ibeos Edge1100 FPGA DMA
 
 config PCI_IXP4XX
 	bool "Intel IXP4xx PCI controller"

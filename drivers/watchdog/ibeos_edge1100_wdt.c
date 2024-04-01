@@ -5,7 +5,7 @@
 #include <linux/watchdog.h>
 #include <asm/io.h>
 
-#include <linux/ibeos_edge2.h>
+#include <linux/ibeos_edge1100.h>
 
 #define DEFAULT_TIMEOUT 30
 #define MIN_TIMEOUT 2

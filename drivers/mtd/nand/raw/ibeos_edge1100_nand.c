@@ -21,7 +21,7 @@
 #include <linux/dma-mapping.h>
 #include <linux/completion.h>
 
-#include <linux/ibeos_edge2.h>
+#include <linux/ibeos_edge1100.h>
 
 #define NUM_CHIPS 8
 

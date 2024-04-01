@@ -141,11 +141,11 @@ config MTD_NAND_ATMEL
 	  Enables support for NAND Flash / Smart Media Card interface
 	  on Atmel AT91 processors.
 
-config MTD_NAND_IBEOS_EDGE2
-    tristate "Ibeos Edge2 NAND (8GB)"
-    depends on PCIE_IBEOS_EDGE2 && PCIE_IBEOS_EDGE2_DMA
+config MTD_NAND_IBEOS_EDGE1100
+    tristate "Ibeos Edge1100 NAND (8GB)"
+    depends on PCIE_IBEOS_EDGE1100 && PCIE_IBEOS_EDGE1100_DMA
     help
-      Enabled support for Ibeos Edge2 NAND
+      Enabled support for Ibeos Edge1100 NAND
 
 config MTD_NAND_ORION
 	tristate "Marvell Orion NAND controller"

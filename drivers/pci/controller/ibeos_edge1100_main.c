@@ -9,13 +9,13 @@
 #include <linux/interrupt.h>
 #include <linux/irq.h>
 
-#include "linux/ibeos_edge2.h"
-#if IS_ENABLED(CONFIG_PCIE_IBEOS_EDGE2_DMA)
-#include <linux/ibeos_edge2_dma.h>
+#include "linux/ibeos_edge1100.h"
+#if IS_ENABLED(CONFIG_PCIE_IBEOS_EDGE1100_DMA)
+#include <linux/ibeos_edge1100_dma.h>
 #endif
-#include "ibeos_edge2_mem.h"
-#include "ibeos_edge2_irq.h"
-#include "linux/ibeos_edge2_driver.h"
+#include "ibeos_edge1100_mem.h"
+#include "ibeos_edge1100_irq.h"
+#include "linux/ibeos_edge1100_driver.h"
 
 dev_t ibeos_edge2_devt;
 struct class *ibeos_edge2_class;
@@ -31,6 +31,15 @@ void *ibeos_edge2_get_bar(int devnum, int bar)
     return states[devnum]?states[devnum]->base[bar]:NULL;
 }
 EXPORT_SYMBOL(ibeos_edge2_get_bar);
+
+size_t ibeos_edge2_get_bar_size(int devnum, int bar)
+{
+    BUG_ON(devnum>=MAX_DEVICES);
+    BUG_ON(bar>=NUM_BARS);
+    //BUG_ON(!states[devnum]);
+    return states[devnum]?states[devnum]->bar_size[bar]:0;
+}
+EXPORT_SYMBOL(ibeos_edge2_get_bar_size);
 
 int ibeos_edge2_get_virq(int devnum, int hwirq)
 {
@@ -72,7 +81,7 @@ static int ibeos_edge2_probe(struct pci_dev *pdev, const struct pci_device_id *e
     ret = pci_enable_device(pdev);
     if(ret) return -ENODEV;
 
-    ret = pci_request_regions(pdev, IBEOS_EDGE2_DRVNAME);
+    ret = pci_request_regions(pdev, IBEOS_EDGE1100_DRVNAME);
     if(ret) goto err_disable;
 
     for(i=0; i<NUM_BARS; ++i) {
@@ -106,7 +115,7 @@ static int ibeos_edge2_probe(struct pci_dev *pdev, const struct pci_device_id *e
 
     dev_info(&pdev->dev, "bridge ver 0x%x\n", ioread32(pps->base[0]+0x4000));
 
-#if IS_ENABLED(CONFIG_PCIE_IBEOS_EDGE2_DMA)
+#if IS_ENABLED(CONFIG_PCIE_IBEOS_EDGE1100_DMA)
     ret = ibeos_edge_dma_init(pps);
     if(ret) goto err_irq;
 #endif
@@ -120,7 +129,7 @@ static int ibeos_edge2_probe(struct pci_dev *pdev, const struct pci_device_id *e
 
     return 0;
     
-#if IS_ENABLED(CONFIG_PCIE_IBEOS_EDGE2_DMA)
+#if IS_ENABLED(CONFIG_PCIE_IBEOS_EDGE1100_DMA)
 err_irq:
 #endif
     ibeos_edge_irq_destroy(pps);
@@ -148,7 +157,7 @@ static void ibeos_edge2_remove(struct pci_dev *pdev)
         if(pps->bar_size[i]>1) ibeos_edge_mem_cdev_destroy(pps, i);
     }
 
-#if IS_ENABLED(CONFIG_PCIE_IBEOS_EDGE2_DMA)
+#if IS_ENABLED(CONFIG_PCIE_IBEOS_EDGE1100_DMA)
     ibeos_edge_dma_destroy(pps);
 #endif
 
@@ -180,7 +189,7 @@ static int __init ibeos_edge2_init(void)
 
     pr_info("Ibeos PF PCIe driver\n");
 
-    ret = alloc_chrdev_region(&ibeos_edge2_devt, 0, MAX_DEVICES, IBEOS_EDGE2_DRVNAME);
+    ret = alloc_chrdev_region(&ibeos_edge2_devt, 0, MAX_DEVICES, IBEOS_EDGE1100_DRVNAME);
     if(ret<0) {
         pr_err("failed in alloc_chrdev_region\n");
         return PTR_ERR(ibeos_edge2_class);

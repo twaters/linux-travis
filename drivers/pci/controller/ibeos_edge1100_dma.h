@@ -1,7 +1,7 @@
 #ifndef IBEOS_EDGE2_DMA_INTERNAL__H
 #define IBEOS_EDGE2_DMA_INTERNAL__H
 
-#include <linux/ibeos_edge2.h>
+#include <linux/ibeos_edge1100.h>
 #include "../../dma/virt-dma.h"
 
 /* taken from microsemi demo, but I am not a fan of bitfields in this way */

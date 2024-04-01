@@ -10,11 +10,11 @@
 #include <linux/irq.h>
 #include <linux/delay.h>
 
-#include "ibeos_edge2_dma.h"
-#include <linux/ibeos_edge2.h>
-#include <linux/ibeos_edge2_dma.h>
+#include "ibeos_edge1100_dma.h"
+#include <linux/ibeos_edge1100.h>
+#include <linux/ibeos_edge1100_dma.h>
 
-#include <linux/ibeos_edge2_driver.h>
+#include <linux/ibeos_edge1100_driver.h>
 
 /* 2 irqs for each physical channel */
 static const int irq_map[NUM_PDMA][NUM_DMA_IRQ] = { {0, 8}, {1, 9} };

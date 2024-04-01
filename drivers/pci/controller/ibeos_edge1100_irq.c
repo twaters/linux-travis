@@ -9,8 +9,8 @@
 #include <linux/irqchip/chained_irq.h>
 #include <linux/poll.h>
 
-#include <linux/ibeos_edge2.h>
-#include <linux/ibeos_edge2_driver.h>
+#include <linux/ibeos_edge1100.h>
+#include <linux/ibeos_edge1100_driver.h>
 
 static DEFINE_RAW_SPINLOCK(ibeos_edge2_spinlock);
 
