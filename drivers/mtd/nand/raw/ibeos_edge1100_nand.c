@@ -154,12 +154,7 @@ static const uint8_t enc_lookup[256] = {
 
 static void edge2_nand_pwr_enable(struct edge2_nand_mtd *enm, int enable)
 {
-    /* NOTE: if we do anything with NOR, we need to protect this register between
-     * the two drivers */
-    uint32_t reg = ioread32(enm->bar+ENAND_REG_PWR);
-    if(enable) reg |= 2;
-    else reg &= ~2;
-    iowrite32(reg, enm->bar+ENAND_REG_PWR);
+    iowrite32(!!enable, enm->bar+ENAND_REG_PWR);
 }
 
 static void edge2_nand_irq_enable(struct edge2_nand_mtd *enm, int enable)
