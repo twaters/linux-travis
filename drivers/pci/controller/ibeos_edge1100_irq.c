@@ -11,6 +11,7 @@
 
 #include <linux/ibeos_edge1100.h>
 #include <linux/ibeos_edge1100_driver.h>
+#include "ibeos_edge1100_irq.h"
 
 static DEFINE_RAW_SPINLOCK(ibeos_edge2_spinlock);
 

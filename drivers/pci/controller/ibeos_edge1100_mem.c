@@ -8,6 +8,7 @@
 
 #include <linux/ibeos_edge1100.h>
 #include <linux/ibeos_edge1100_driver.h>
+#include "ibeos_edge1100_mem.h"
 
 static int ibeos_edge_mem_cdev_open(struct inode *inode, struct file *file)
 {
