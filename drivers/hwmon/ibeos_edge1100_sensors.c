@@ -93,7 +93,7 @@ static int edge2_sensors_read(struct device *dev, enum hwmon_sensor_types type, 
         ehs->last_ref_reading = now;
     }
 
-    if(attr==hwmon_in) {
+    if(type==hwmon_in) {
         /* voltages */
         if(channel>4) return -EOPNOTSUPP;
 
