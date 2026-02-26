@@ -1071,8 +1071,26 @@ static int xgbe_phy_find_phy_device(struct xgbe_prv_data *pdata)
 	int ret;
 
 	/* If we already have a PHY, just return */
-	if (phy_data->phydev)
+	if (phy_data->phydev) {
+		/* For 10GBase-T SFP modules the PHY may have been registered
+		 * with a garbage ID if probed before its firmware finished
+		 * booting. If the registered ID is not the Marvell 88X3310
+		 * OUI (0x0141), tear down the stale entry so we re-probe.
+		 */
+		if (phy_data->sfp_base == XGBE_SFP_BASE_10000_T &&
+		    (phy_data->phydev->phy_id >> 16) != 0x0141) {
+			netif_dbg(pdata, drv, pdata->netdev,
+				  "stale PHY id %#010x, re-probing\n",
+				  phy_data->phydev->phy_id);
+			phy_detach(phy_data->phydev);
+			phy_device_remove(phy_data->phydev);
+			phy_device_free(phy_data->phydev);
+			phy_data->phydev = NULL;
+			phy_data->sfp_phy_avail = 0;
+			return 0;
+		}
 		return 0;
+	}
 
 	/* Clear the extra AN flag */
 	pdata->an_again = 0;
@@ -1149,10 +1167,23 @@ static void xgbe_phy_sfp_external_phy(struct xgbe_prv_data *pdata)
 	    phy_data->sfp_base != XGBE_SFP_BASE_10000_T)
 		return;
 
-	/* Check access to the PHY by reading CTRL1 */
-	ret = xgbe_phy_i2c_mii_read(pdata, MII_BMCR);
-	if (ret < 0)
-		return;
+	/* Check access to the PHY by reading PHYSID1 (register 2).
+	 * For a 10GBase-T SFP (e.g. Marvell 88X3310) the PHY's I2C
+	 * management interface can respond to I2C transactions before its
+	 * internal firmware has finished booting, returning 0x0000 or
+	 * other garbage from PHYSID1. Only declare the PHY available once
+	 * PHYSID1 returns a plausible non-zero value so that
+	 * get_phy_device() reads the correct ID and can match a driver.
+	 */
+	if (phy_data->sfp_base == XGBE_SFP_BASE_10000_T) {
+		ret = xgbe_phy_i2c_mii_read(pdata, MII_PHYSID1);
+		if (ret <= 0)
+			return;
+	} else {
+		ret = xgbe_phy_i2c_mii_read(pdata, MII_BMCR);
+		if (ret < 0)
+			return;
+	}
 
 	/* Successfully accessed the PHY */
 	phy_data->sfp_phy_avail = 1;
