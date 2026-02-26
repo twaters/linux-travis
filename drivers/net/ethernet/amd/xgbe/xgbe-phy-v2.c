@@ -204,6 +204,7 @@ enum xgbe_sfp_base {
 	XGBE_SFP_BASE_10000_LRM,
 	XGBE_SFP_BASE_10000_ER,
 	XGBE_SFP_BASE_10000_CR,
+	XGBE_SFP_BASE_10000_T,
 };
 
 enum xgbe_sfp_speed {
@@ -813,6 +814,7 @@ static void xgbe_phy_sfp_phy_settings(struct xgbe_prv_data *pdata)
 
 	switch (phy_data->sfp_base) {
 	case XGBE_SFP_BASE_1000_T:
+	case XGBE_SFP_BASE_10000_T:
 	case XGBE_SFP_BASE_1000_SX:
 	case XGBE_SFP_BASE_1000_LX:
 	case XGBE_SFP_BASE_1000_CX:
@@ -823,13 +825,20 @@ static void xgbe_phy_sfp_phy_settings(struct xgbe_prv_data *pdata)
 		XGBE_SET_SUP(lks, Autoneg);
 		XGBE_SET_SUP(lks, Pause);
 		XGBE_SET_SUP(lks, Asym_Pause);
-		if (phy_data->sfp_base == XGBE_SFP_BASE_1000_T) {
+		if (phy_data->sfp_base == XGBE_SFP_BASE_1000_T ||
+		    phy_data->sfp_base == XGBE_SFP_BASE_10000_T) {
 			if (phy_data->port_speeds & XGBE_PHY_PORT_SPEED_10)
 				XGBE_SET_SUP(lks, 10baseT_Full);
 			if (phy_data->port_speeds & XGBE_PHY_PORT_SPEED_100)
 				XGBE_SET_SUP(lks, 100baseT_Full);
 			if (phy_data->port_speeds & XGBE_PHY_PORT_SPEED_1000)
 				XGBE_SET_SUP(lks, 1000baseT_Full);
+			if (phy_data->sfp_base == XGBE_SFP_BASE_10000_T) {
+				if (phy_data->port_speeds & XGBE_PHY_PORT_SPEED_2500)
+					XGBE_SET_SUP(lks, 2500baseT_Full);
+				if (phy_data->port_speeds & XGBE_PHY_PORT_SPEED_10000)
+					XGBE_SET_SUP(lks, 10000baseT_Full);
+			}
 		} else {
 			if (phy_data->port_speeds & XGBE_PHY_PORT_SPEED_1000)
 				XGBE_SET_SUP(lks, 1000baseX_Full);
@@ -878,6 +887,7 @@ static void xgbe_phy_sfp_phy_settings(struct xgbe_prv_data *pdata)
 	case XGBE_SFP_BASE_1000_T:
 	case XGBE_SFP_BASE_1000_CX:
 	case XGBE_SFP_BASE_10000_CR:
+	case XGBE_SFP_BASE_10000_T:
 		XGBE_SET_SUP(lks, TP);
 		break;
 	default:
@@ -1135,7 +1145,8 @@ static void xgbe_phy_sfp_external_phy(struct xgbe_prv_data *pdata)
 
 	phy_data->sfp_phy_avail = 0;
 
-	if (phy_data->sfp_base != XGBE_SFP_BASE_1000_T)
+	if (phy_data->sfp_base != XGBE_SFP_BASE_1000_T &&
+	    phy_data->sfp_base != XGBE_SFP_BASE_10000_T)
 		return;
 
 	/* Check access to the PHY by reading CTRL1 */
@@ -1207,6 +1218,27 @@ static void xgbe_phy_sfp_parse_eeprom(struct xgbe_prv_data *pdata)
 	/* Update transceiver signals (eeprom extd/options) */
 	phy_data->sfp_tx_fault = xgbe_phy_check_sfp_tx_fault(phy_data);
 	phy_data->sfp_rx_los = xgbe_phy_check_sfp_rx_los(phy_data);
+
+	/* Detect 10GBase-T SFP modules that spoof a fiber identity.
+	 * The 10GTEK ASF-10G-T (Marvell 88X3310) presents itself as an
+	 * Intel FTLX8571D3BCV-IT 10GBase-SR module. Detect this by vendor
+	 * name and part number and override to the correct copper type.
+	 *
+	 * Additional spoofing vendors/PNs can be added here as discovered.
+	 */
+	if (!memcmp(&sfp_base[XGBE_SFP_BASE_VENDOR_NAME],
+		    "Intel Corp      ", XGBE_SFP_BASE_VENDOR_NAME_LEN) &&
+	    !memcmp(&sfp_base[XGBE_SFP_BASE_VENDOR_PN],
+		    "FTLX8571D3BCV-IT", XGBE_SFP_BASE_VENDOR_PN_LEN)) {
+		/* Force copper 10GBase-T cable/base type */
+		phy_data->sfp_cable = XGBE_SFP_CABLE_ACTIVE;
+		phy_data->sfp_base  = XGBE_SFP_BASE_10000_T;
+		phy_data->sfp_speed = XGBE_SFP_SPEED_10000;
+		netif_info(pdata, drv, pdata->netdev,
+			   "SFP: detected 10GBase-T module spoofing as "
+			   "Intel FTLX8571D3BCV-IT, treating as copper\n");
+		return;
+	}
 
 	/* Assume FIBER cable unless told otherwise */
 	if (sfp_base[XGBE_SFP_BASE_CABLE] & XGBE_SFP_BASE_CABLE_PASSIVE) {
@@ -1950,6 +1982,8 @@ static enum xgbe_an_mode xgbe_phy_an_sfp_mode(struct xgbe_phy_data *phy_data)
 	switch (phy_data->sfp_base) {
 	case XGBE_SFP_BASE_1000_T:
 		return XGBE_AN_MODE_CL37_SGMII;
+	case XGBE_SFP_BASE_10000_T:
+		return XGBE_AN_MODE_CL73;
 	case XGBE_SFP_BASE_1000_SX:
 	case XGBE_SFP_BASE_1000_LX:
 	case XGBE_SFP_BASE_1000_CX:
@@ -2698,6 +2732,9 @@ static bool xgbe_phy_use_sfp_mode(struct xgbe_prv_data *pdata,
 	case XGBE_MODE_SFI:
 		if (phy_data->sfp_mod_absent)
 			return true;
+		if (phy_data->sfp_base == XGBE_SFP_BASE_10000_T)
+			return xgbe_phy_check_mode(pdata, mode,
+						   XGBE_ADV(lks, 10000baseT_Full));
 		return xgbe_phy_check_mode(pdata, mode,
 					   XGBE_ADV(lks, 10000baseSR_Full)  ||
 					   XGBE_ADV(lks, 10000baseLR_Full)  ||
@@ -3365,9 +3402,16 @@ static void xgbe_phy_stop(struct xgbe_prv_data *pdata)
 	/* If we have an external PHY, free it */
 	xgbe_phy_free_phy_device(pdata);
 
-	/* Reset SFP data */
+	/* Reset SFP data, but preserve the sfp_eeprom cache so that the
+	 * memcmp in xgbe_phy_sfp_read_eeprom() correctly identifies an
+	 * unchanged module as sfp_changed=0 after a stop/start cycle.
+	 * Calling xgbe_phy_sfp_mod_absent() here would zero the cache,
+	 * causing every restart to look like a fresh module insertion,
+	 * triggering another an_restart, and looping forever.
+	 */
 	xgbe_phy_sfp_reset(phy_data);
-	xgbe_phy_sfp_mod_absent(pdata);
+	phy_data->sfp_mod_absent = 1;
+	phy_data->sfp_phy_avail = 0;
 
 	/* Reset CDR support */
 	xgbe_phy_cdr_track(pdata);

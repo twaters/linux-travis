@@ -396,6 +396,23 @@ static void sfp_fixup_rollball_cc(struct sfp *sfp)
 	sfp->id.base.extended_cc = SFF8024_ECC_10GBASE_T_SFI;
 }
 
+static void sfp_fixup_10gtek_asf10gt(struct sfp *sfp)
+{
+	/* The 10GTEK ASF-10G-T is a 10GBase-T copper SFP+ module based on
+	 * the Marvell 88X3310 PHY. It spoofs the EEPROM identity of an Intel
+	 * FTLX8571D3BCV-IT 10GBase-SR fiber module to pass host allowlists.
+	 *
+	 * Fix up the connector type and extended compliance code so the kernel
+	 * treats it as a copper module, and set the MDIO protocol to C45 over
+	 * I2C so the embedded PHY is probed. 4 second startup wait is needed
+	 * before the 88X3310 PHY is ready to respond to MDIO transactions.
+	 */
+	sfp->id.base.connector = SFF8024_CONNECTOR_RJ45;
+	sfp->id.base.extended_cc = SFF8024_ECC_10GBASE_T_SR;
+	sfp->mdio_protocol = MDIO_I2C_C45;
+	sfp->module_t_wait = msecs_to_jiffies(4 * 1000);
+}
+
 static void sfp_quirk_2500basex(const struct sfp_eeprom_id *id,
 				unsigned long *modes,
 				unsigned long *interfaces)
@@ -488,6 +505,11 @@ static const struct sfp_quirk sfp_quirks[] = {
 	SFP_QUIRK_F("OEM", "RTSFP-10G", sfp_fixup_rollball_cc),
 	SFP_QUIRK_F("Turris", "RTSFP-10", sfp_fixup_rollball),
 	SFP_QUIRK_F("Turris", "RTSFP-10G", sfp_fixup_rollball),
+  
+	// 10GTEK ASF-10G-T copper 10GBase-T SFP+ (Marvell 88X3310) spoofs as
+	// Intel FTLX8571D3BCV-IT 10GBase-SR fiber to pass host allowlists.
+	// MDIO_I2C_C45 is used as only I2C (no dedicated MDIO) is available.
+	SFP_QUIRK_F("Intel Corp", "FTLX8571D3BCV-IT", sfp_fixup_10gtek_asf10gt),
 };
 
 static size_t sfp_strlen(const char *str, size_t maxlen)
