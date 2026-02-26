@@ -1406,7 +1406,15 @@ static int xgbe_phy_sfp_read_eeprom(struct xgbe_prv_data *pdata)
 	}
 
 	/* Check for an added or changed SFP */
-	if (memcmp(&phy_data->sfp_eeprom, &sfp_eeprom, sizeof(sfp_eeprom))) {
+	/* Compare only base[64] + extd[32] (first 96 bytes of A0h EEPROM).
+	 * The vendor[32] field (bytes 96-127) is vendor-specific and may
+	 * contain volatile data on some modules (e.g. Marvell 88X3310),
+	 * causing memcmp to always find a difference and sfp_changed to
+	 * loop forever. Only the base and extd fields are meaningful for
+	 * detecting a module change or insertion.
+	 */
+	if (memcmp(&phy_data->sfp_eeprom, &sfp_eeprom,
+		   sizeof(sfp_eeprom.base) + sizeof(sfp_eeprom.extd))) {
 		phy_data->sfp_changed = 1;
 
 		if (netif_msg_drv(pdata))
